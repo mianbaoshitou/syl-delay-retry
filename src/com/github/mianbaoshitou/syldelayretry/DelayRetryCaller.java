@@ -17,9 +17,6 @@ import java.util.concurrent.*;
 public class DelayRetryCaller<U> {
 
 
-
-
-
     private IDelayStrategy delayStrategy;
     private IFinishStrategy finishStrategy;
     private String routingKey;
@@ -30,31 +27,43 @@ public class DelayRetryCaller<U> {
     BlockingQueue<Pair<Future, UUID>> taskDelayRetryQ = new LinkedBlockingQueue<>();
     DelayQueue<DelayItem> delayQueue = new DelayQueue<>();
     private ExecutorService executorService = Executors.newCachedThreadPool();
-    public CompletableFuture call(Callable<U> callable){
-        try {
 
+
+    public DelayRetryCaller(IDelayStrategy delayStrategy, IFinishStrategy finishStrategy) {
+        this.delayStrategy = delayStrategy;
+        this.finishStrategy = finishStrategy;
+    }
+
+    public DelayRetryCaller(IDelayStrategy delayStrategy, IFinishStrategy finishStrategy, ExecutorService executorService) {
+        this(delayStrategy, finishStrategy);
+        this.executorService = executorService;
+    }
+
+    public CompletableFuture call(Callable<U> callable){
+        // 生成给调用方的凭据
+        CompletableFuture<ITryResult> clientRequestFuture = new CompletableFuture<>();
+        try {
             // 接收到任务
             UUID requestId = UUID.randomUUID();
-
             // 将任务提交到线程池,返回当次任务Future
             Future<U> future = executorService.submit(callable);
             // 将 future 放入延迟重试监视队列
             taskDelayRetryQ.offer(new Pair<>(future, requestId));
-
-            // 生成给调用方的凭据
-            CompletableFuture<ITryResult> clientRequestFuture = new CompletableFuture<>();
             //将两者关联
             runningTasks.put(requestId, clientRequestFuture);
             tasksCallable.put(requestId, callable);
             //返回给调用者关联的 future
 //            U result = task.call();
 
-            return clientRequestFuture;
+//            return clientRequestFuture;
            
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            //gc
+            clientRequestFuture = null;
             e.printStackTrace();
         }
-        return null;
+
+        return clientRequestFuture;
     }
 
     public void futureTaskMonitor(){

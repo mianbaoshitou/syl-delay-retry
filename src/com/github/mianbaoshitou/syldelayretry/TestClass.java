@@ -14,7 +14,8 @@ public class TestClass {
     public static void main(String[] args) {
         TestDelayStrategy testDelayStrategy = new TestDelayStrategy();
         TestFinishStrategy testFinishStrategy = new TestFinishStrategy();
-        DelayRetryCaller<Object> retryCaller = new DelayRetryCaller<>();
+//        DelayRetryCaller<Object> retryCaller = new DelayRetryCaller<>();
+        DelayRetryCaller retryCaller = new DelayRetryCallerBuilder().withDelayStrategy(testDelayStrategy).withFinishStrategy(testFinishStrategy).build();
         retryCaller.setDelayStrategy(testDelayStrategy);
         retryCaller.setFinishStrategy(testFinishStrategy);
         TestCallable testCallable = new TestCallable(1l);

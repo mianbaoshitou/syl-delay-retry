@@ -9,14 +9,14 @@ import java.util.concurrent.Callable;
  * Description:
  */
 public class TestCallable implements Callable<Object> {
-    private int time = 0;
+    private Long time ;
 
-    public TestCallable(int time) {
+    public TestCallable(Long time) {
         this.time = time;
     }
 
     @Override
     public Long call() throws Exception {
-        return System.nanoTime();
+        return time + 1;
     }
 }

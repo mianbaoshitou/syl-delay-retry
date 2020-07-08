@@ -7,8 +7,10 @@ package com.github.mianbaoshitou.syldelayretry;
  * Description: 测试停止策略
  */
 public class TestFinishStrategy implements IFinishStrategy {
+    int totalTime = 0;
     @Override
     public boolean finishPredicate(ITryResult tryResult) {
-        return false;
+        totalTime = totalTime + 1;
+        return totalTime > 10;
     }
 }

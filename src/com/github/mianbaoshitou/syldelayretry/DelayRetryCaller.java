@@ -64,7 +64,8 @@ public class DelayRetryCaller<U> {
             public void run() {
                 while (true){
                     try {
-                        Pair<Future, UUID> taskPair = taskDelayRetryQ.poll();
+                        //防止进程以外关闭导致任务丢失
+                        Pair<Future, UUID> taskPair = taskDelayRetryQ.peek();
                         if(null != taskPair) {
                             //取出 future, 查看是否已经完成
                             Future future = taskPair.getKey();
@@ -85,10 +86,15 @@ public class DelayRetryCaller<U> {
                                     //放入延时消息队列
                                     delayQueue.offer(new DelayItem(nextRetryDelay, taskPair.getValue()));
                                 }
+
                             } else {
                                 //重新加入监视队列
+
                                 taskDelayRetryQ.offer(taskPair);
+
                             }
+                            //处理完成，读出任务并直接丢弃
+                            taskDelayRetryQ.take();
                         }
 
                         //检查延时队列

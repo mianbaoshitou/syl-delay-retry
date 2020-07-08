@@ -1,6 +1,7 @@
 package com.github.mianbaoshitou.syldelayretry;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * FileName: TryResult
@@ -10,10 +11,12 @@ import java.util.ArrayList;
  */
 public class TryResult implements ITryResult {
     private ArrayList<Long> timePoints;
+    private UUID requestId;
     private Object result;
     TryResult(Object result){
         timePoints = new ArrayList<Long>();
         this.result = result;
+        requestId = UUID.randomUUID();
     }
 
 
@@ -35,6 +38,11 @@ public class TryResult implements ITryResult {
             return System.nanoTime() - timePoints.get(0);
         }
         return 0;
+    }
+
+    @Override
+    public UUID getRequestId() {
+        return requestId;
     }
 
     public Object getTryResult() {

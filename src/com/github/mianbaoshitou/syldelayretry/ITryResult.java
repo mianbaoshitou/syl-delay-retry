@@ -1,6 +1,8 @@
 package com.github.mianbaoshitou.syldelayretry;
 
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * FileName: ITryResult
@@ -9,6 +11,7 @@ import java.util.ArrayList;
  * Description:
  */
 public interface ITryResult<R> {
+
     /**
      * 获取所有重试时间记录-纳秒
      * @return
@@ -32,6 +35,12 @@ public interface ITryResult<R> {
      * @return
      */
     long durationFromFirstTry();
+
+    /**
+     * 客户端请求唯一 ID
+     * @return
+     */
+    UUID getRequestId();
 
     /**
      * 获取执行结果

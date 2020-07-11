@@ -48,4 +48,6 @@ public interface ITryResult<R> {
      */
     public R getTryResult();
 
+    public void setTryResultData(Object data);
+
 }

@@ -6,6 +6,7 @@ import javafx.util.Pair;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * FileName: DelayRetryCaller
@@ -23,9 +24,10 @@ public class DelayRetryCaller<U> {
 
 //    private Callable<U> task;
     private static final ConcurrentHashMap<UUID, CompletableFuture> runningTasks = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<UUID, Callable> tasksCallable = new ConcurrentHashMap<>();
-    BlockingQueue<Pair<Future, UUID>> taskDelayRetryQ = new LinkedBlockingQueue<>();
-    DelayQueue<DelayItem> delayQueue = new DelayQueue<>();
+    private static final ConcurrentHashMap<UUID, Pair<Callable,TryResult>> tasksCallable = new ConcurrentHashMap<>();
+    private static final AtomicBoolean monitorThreadStarted = new AtomicBoolean(false);
+    private static final BlockingQueue<Pair<Future, UUID>> taskDelayRetryQ = new LinkedBlockingQueue<>();
+    private static final DelayQueue<DelayItem> delayQueue = new DelayQueue<>();
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
 
@@ -40,6 +42,8 @@ public class DelayRetryCaller<U> {
     }
 
     public CompletableFuture call(Callable<U> callable){
+//        futureTaskMonitor();
+        System.out.println("callable = [" + callable + "]");
         // 生成给调用方的凭据
         CompletableFuture<ITryResult> clientRequestFuture = new CompletableFuture<>();
         try {
@@ -51,7 +55,8 @@ public class DelayRetryCaller<U> {
             taskDelayRetryQ.offer(new Pair<>(future, requestId));
             //将两者关联
             runningTasks.put(requestId, clientRequestFuture);
-            tasksCallable.put(requestId, callable);
+            TryResult initTryResult = new TryResult(null);
+            tasksCallable.put(requestId, new Pair<Callable,TryResult>(callable, initTryResult));
             //返回给调用者关联的 future
 //            U result = task.call();
 
@@ -67,6 +72,12 @@ public class DelayRetryCaller<U> {
     }
 
     public void futureTaskMonitor(){
+        if(monitorThreadStarted.compareAndSet(false,true)){
+            System.out.println("创建监控线程");
+        }else{
+            System.out.println("线程已经启动，直接返回");
+            return;
+        }
         //启动任务监视线程
         Thread monitorThread = new Thread(new Runnable() {
 
@@ -81,7 +92,9 @@ public class DelayRetryCaller<U> {
                             if (future.isDone()) {
                                 //获取线程池中执行结果
                                 final Object result = future.get();
-                                TryResult tryResult = new TryResult(result);
+                                TryResult tryResult = tasksCallable.get(taskPair.getValue()).getValue();
+                                tryResult.putTryAgainTime();
+                                tryResult.setTryResultData(result);
                                 if (finishStrategy.finishPredicate(tryResult)) {
 
                                     System.out.println("任务结束" + tryResult.getTryResult());
@@ -111,7 +124,7 @@ public class DelayRetryCaller<U> {
                         DelayItem delayItem = delayQueue.poll();
                         if(null != delayItem){
                             System.out.println("获取到延迟任务" + LocalDateTime.now());
-                            Callable callable = tasksCallable.get(delayItem.getItemId());
+                            Callable callable = tasksCallable.get(delayItem.getItemId()).getKey();
                             Future<U> future = executorService.submit(callable);
                             // 将 future 放入延迟重试监视队列
                             taskDelayRetryQ.offer(new Pair<>(future, delayItem.getItemId()));
@@ -125,8 +138,8 @@ public class DelayRetryCaller<U> {
             }
             }
         });
+        monitorThread.start();
 
-        monitorThread.run();
     }
 
 

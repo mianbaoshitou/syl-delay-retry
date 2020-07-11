@@ -48,4 +48,11 @@ public class TryResult implements ITryResult {
     public Object getTryResult() {
         return result;
     }
+
+    @Override
+    public void setTryResultData(Object data) {
+        this.result = data;
+    }
+
+
 }

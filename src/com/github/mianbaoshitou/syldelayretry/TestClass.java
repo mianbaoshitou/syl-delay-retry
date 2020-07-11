@@ -16,17 +16,25 @@ public class TestClass {
         TestFinishStrategy testFinishStrategy = new TestFinishStrategy();
 //        DelayRetryCaller<Object> retryCaller = new DelayRetryCaller<>();
         DelayRetryCaller retryCaller = new DelayRetryCallerBuilder().withDelayStrategy(testDelayStrategy).withFinishStrategy(testFinishStrategy).build();
-        retryCaller.setDelayStrategy(testDelayStrategy);
-        retryCaller.setFinishStrategy(testFinishStrategy);
-        TestCallable testCallable = new TestCallable(1l);
-        TestCallable testCallable2 = new TestCallable(1l);
-        retryCaller.call(testCallable);
-        CompletableFuture completableFuture = retryCaller.call(testCallable2);
-
+        TestCallable testCallable11 = new TestCallable(100l);
+        TestCallable testCallable12 = new TestCallable(150l);
+        retryCaller.call(testCallable11);
+        CompletableFuture completableFuture = retryCaller.call(testCallable12);
         retryCaller.futureTaskMonitor();
+
+        System.out.println("启动第二批");
+        DelayRetryCaller retryCaller2 = new DelayRetryCallerBuilder().withDelayStrategy(testDelayStrategy).withFinishStrategy(testFinishStrategy).build();
+        TestCallable testCallable21 = new TestCallable(200l);
+        TestCallable testCallable22 = new TestCallable(250l);
+        retryCaller2.call(testCallable21);
+
+        CompletableFuture completableFuture22 = retryCaller2.call(testCallable22);
+
+        retryCaller2.futureTaskMonitor();
         try {
-            Object o = completableFuture.get();
-            System.out.println("args = [" + o + "]");
+//            Object o = completableFuture.get();
+            Object o2 = completableFuture22.get();
+            System.out.println("args = [" + o2 + "]");
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

@@ -84,6 +84,7 @@ public class DelayRetryCaller<U> {
                                 TryResult tryResult = new TryResult(result);
                                 if (finishStrategy.finishPredicate(tryResult)) {
 
+                                    System.out.println("任务结束" + tryResult.getTryResult());
                                     //结束的任务,将CompletableFuture设置为结束并返回结果
                                     runningTasks.get(taskPair.getValue()).complete(tryResult.getTryResult());
                                     //任务完成, 清理数据
@@ -125,7 +126,7 @@ public class DelayRetryCaller<U> {
             }
         });
 
-        monitorThread.start();
+        monitorThread.run();
     }
 
 

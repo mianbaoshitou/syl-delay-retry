@@ -46,6 +46,6 @@ public class TryResult implements ITryResult {
     }
 
     public Object getTryResult() {
-        return null;
+        return result;
     }
 }

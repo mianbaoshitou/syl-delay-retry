@@ -50,4 +50,5 @@ public interface ITryResult<R> {
 
     public void setTryResultData(Object data);
 
+
 }

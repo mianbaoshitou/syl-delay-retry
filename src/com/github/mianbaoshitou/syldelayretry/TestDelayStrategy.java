@@ -9,6 +9,7 @@ package com.github.mianbaoshitou.syldelayretry;
 public class TestDelayStrategy implements IDelayStrategy {
     @Override
     public long nextRetryDelay(ITryResult tryResult) {
+        System.out.println("计算延迟 tryResult = [" + tryResult.toString() + "]");
         return 1000 + System.currentTimeMillis();
     }
 }

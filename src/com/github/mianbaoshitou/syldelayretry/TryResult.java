@@ -25,7 +25,7 @@ public class TryResult implements ITryResult {
     }
 
     public int putTryAgainTime() {
-        timePoints.add(System.nanoTime());
+        timePoints.add(System.currentTimeMillis());
         return timePoints.size();
     }
 
@@ -54,5 +54,12 @@ public class TryResult implements ITryResult {
         this.result = data;
     }
 
-
+    @Override
+    public String toString() {
+        return "TryResult{" +
+                "timePoints=" + timePoints +
+                ", requestId=" + requestId +
+                ", result=" + result +
+                '}';
+    }
 }

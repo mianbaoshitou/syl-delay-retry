@@ -10,7 +10,7 @@ public class TestFinishStrategy implements IFinishStrategy {
     int totalTime = 0;
     @Override
     public boolean finishPredicate(ITryResult tryResult) {
-        System.out.println("tryResult = [" + tryResult.getTryResult() + "]");
+        System.out.println("tryResult = [" + tryResult.getTryResult() + "]" + tryResult.getTryTotalTimes());
         return tryResult.getTryTotalTimes() > 10;
     }
 }

@@ -20,7 +20,7 @@ public class TestClass {
         TestCallable testCallable12 = new TestCallable(150l);
         retryCaller.call(testCallable11);
         CompletableFuture completableFuture = retryCaller.call(testCallable12);
-        retryCaller.futureTaskMonitor();
+//        retryCaller.futureTaskMonitor();
 
         System.out.println("启动第二批");
         DelayRetryCaller retryCaller2 = new DelayRetryCallerBuilder().withDelayStrategy(testDelayStrategy).withFinishStrategy(testFinishStrategy).build();
@@ -30,7 +30,7 @@ public class TestClass {
 
         CompletableFuture completableFuture22 = retryCaller2.call(testCallable22);
 
-        retryCaller2.futureTaskMonitor();
+//        retryCaller2.futureTaskMonitor();
         try {
 //            Object o = completableFuture.get();
             Object o2 = completableFuture22.get();
